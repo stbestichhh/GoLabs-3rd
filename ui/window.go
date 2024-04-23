@@ -106,6 +106,11 @@ func detectTerminate(e any) bool {
 	return false
 }
 
+var (
+	centerX int
+	centerY int
+)
+
 func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 	switch e := e.(type) {
 
@@ -117,13 +122,26 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 
 	case mouse.Event:
 		if t == nil {
-			// TODO: Реалізувати реакцію на натискання кнопки миші.
+			if e.Button == mouse.ButtonLeft && e.Direction == mouse.DirPress {
+				centerX = int(e.X)
+				centerY = int(e.Y)
+
+				pw.drawDefaultUI(centerX, centerY)
+
+				pw.w.Send(paint.Event{})
+			}
 		}
 
 	case paint.Event:
 		// Малювання контенту вікна.
 		if t == nil {
-			pw.drawDefaultUI()
+			if centerX == 0 && centerY == 0 {
+				centerX = pw.sz.Bounds().Dx() / 2
+				centerY = pw.sz.Bounds().Dy() / 2
+				pw.drawDefaultUI(centerX, centerY)
+			} else {
+				pw.drawDefaultUI(centerX, centerY)
+			}
 		} else {
 			// Використання текстури отриманої через виклик Update.
 			pw.w.Scale(pw.sz.Bounds(), t, t.Bounds(), draw.Src, nil)
@@ -132,11 +150,9 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 	}
 }
 
-func (pw *Visualizer) drawDefaultUI() {
-	pw.w.Fill(pw.sz.Bounds(), color.RGBA{0, 128, 0, 255}, draw.Src) // Фон.
 
-	centerX := pw.sz.Bounds().Dx() / 2
-	centerY := pw.sz.Bounds().Dy() / 2
+func (pw *Visualizer) drawDefaultUI(centerX int, centerY int) {
+	pw.w.Fill(pw.sz.Bounds(), color.RGBA{0, 128, 0, 255}, draw.Src) // Фон.
 
 	rectWidth := 170
 	rectHeight := 400
