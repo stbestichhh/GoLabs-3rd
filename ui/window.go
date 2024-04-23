@@ -43,6 +43,8 @@ func (pw *Visualizer) Update(t screen.Texture) {
 
 func (pw *Visualizer) run(s screen.Screen) {
 	w, err := s.NewWindow(&screen.NewWindowOptions{
+		Width: 800,
+		Height: 800,
 		Title: pw.Title,
 	})
 	if err != nil {
