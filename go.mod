@@ -1,6 +1,6 @@
 module github.com/roman-mazur/architecture-lab-3
 
-go 1.22
+go 1.21
 
 require (
 	golang.org/x/exp/shiny v0.0.0-20230321023759-10a507213a29
