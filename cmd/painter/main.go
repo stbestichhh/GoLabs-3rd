@@ -26,7 +26,6 @@ func main() {
 	go func() {
 		http.Handle("/", lang.HttpHandler(&opLoop, &parser))
 		_ = http.ListenAndServe("localhost:17000", nil)
-		println("Server listening on localhost:17000")
 	}()
 
 	pv.Main()
