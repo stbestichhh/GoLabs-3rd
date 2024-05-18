@@ -3,7 +3,6 @@ package lang
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -34,13 +33,13 @@ func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
 	for scanner.Scan() {
 		cmd := scanner.Text()
 
-		error := p.Parse(cmd)
+		error := p.parse(cmd)
 		if error != nil {
 			return nil, error
 		}
-
-		return p.result(), nil
 	}
+
+	return p.result(), nil
 }
 
 func (p *Parser) result() []painter.Operation {
