@@ -31,11 +31,11 @@ func TestLoop_Post(t *testing.T) {
 	l.Post(OperationFunc(func(screen.Texture) {
 		testOps = append(testOps, "op 1")
 		l.Post(OperationFunc(func(screen.Texture) {
-			testOps = append(testOps, "op 2")
+			testOps = append(testOps, "op 3")
 		}))
 	}))
 	l.Post(OperationFunc(func(screen.Texture) {
-		testOps = append(testOps, "op 3")
+		testOps = append(testOps, "op 2")
 	}))
 
 	l.StopAndWait()

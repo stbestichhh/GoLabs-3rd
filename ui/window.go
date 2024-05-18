@@ -16,6 +16,11 @@ import (
 	"golang.org/x/mobile/event/size"
 )
 
+const (
+	WindowWidth = 800
+	WindowHeight = 800
+)
+
 type Visualizer struct {
 	Title         string
 	Debug         bool
@@ -26,14 +31,14 @@ type Visualizer struct {
 	done chan struct{}
 
 	sz  size.Event
-	pos image.Rectangle
+	crossCenter image.Point
 }
 
 func (pw *Visualizer) Main() {
 	pw.tx = make(chan screen.Texture)
 	pw.done = make(chan struct{})
-	pw.pos.Max.X = 200
-	pw.pos.Max.Y = 200
+	pw.crossCenter.X = WindowWidth / 2
+	pw.crossCenter.Y = WindowHeight / 2
 	driver.Main(pw.run)
 }
 
@@ -43,8 +48,8 @@ func (pw *Visualizer) Update(t screen.Texture) {
 
 func (pw *Visualizer) run(s screen.Screen) {
 	w, err := s.NewWindow(&screen.NewWindowOptions{
-		Width: 800,
-		Height: 800,
+		Width: WindowWidth,
+		Height: WindowHeight,
 		Title: pw.Title,
 	})
 	if err != nil {
@@ -123,10 +128,10 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 	case mouse.Event:
 		if t == nil {
 			if e.Button == mouse.ButtonLeft && e.Direction == mouse.DirPress {
-				centerX = int(e.X)
-				centerY = int(e.Y)
-
-				pw.drawDefaultUI(centerX, centerY)
+				pw.crossCenter = image.Point{
+					int(e.X),
+					int(e.Y),
+				}
 
 				pw.w.Send(paint.Event{})
 			}
@@ -135,13 +140,7 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 	case paint.Event:
 		// Малювання контенту вікна.
 		if t == nil {
-			if centerX == 0 && centerY == 0 {
-				centerX = pw.sz.Bounds().Dx() / 2
-				centerY = pw.sz.Bounds().Dy() / 2
-				pw.drawDefaultUI(centerX, centerY)
-			} else {
-				pw.drawDefaultUI(centerX, centerY)
-			}
+				pw.drawDefaultUI()
 		} else {
 			// Використання текстури отриманої через виклик Update.
 			pw.w.Scale(pw.sz.Bounds(), t, t.Bounds(), draw.Src, nil)
@@ -151,15 +150,12 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 }
 
 
-func (pw *Visualizer) drawDefaultUI(centerX int, centerY int) {
+func (pw *Visualizer) drawDefaultUI() {
 	pw.w.Fill(pw.sz.Bounds(), color.RGBA{0, 128, 0, 255}, draw.Src) // Фон.
 
-	rectWidth := 170
-	rectHeight := 400
+	x, y := pw.crossCenter.X, pw.crossCenter.Y
+	c := color.RGBA{255,255,0,255}
 
-	verticalRect := image.Rect(centerX - rectHeight / 2, centerY - rectWidth / 2, centerX + rectHeight / 2, centerY + rectWidth / 2)
-	pw.w.Fill(verticalRect, color.RGBA{255, 255, 0, 255}, draw.Src)
-
-	horizontalRect := image.Rect(centerX - rectWidth / 2, centerY - rectHeight / 2, centerX + rectWidth / 2, centerY + rectHeight / 2)
-	pw.w.Fill(horizontalRect, color.RGBA{255, 255, 0, 255}, draw.Src)
+	pw.w.Fill(image.Rect(x-100, y+25, x+100, y-25), c, draw.Src)
+	pw.w.Fill(image.Rect(x-25, y+100, x+25, y-100), c, draw.Src)
 }
